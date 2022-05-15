@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -17,20 +19,39 @@ class _HomePageState extends State<HomePage> {
   double height = 0;
   double time = 0;
   double gravity = -4.9;
-  double velocity = 30;
+  double velocity = 3.5;
 
-  void jump() {
-    Timer.periodic(Duration(milliseconds: 50), (timer){
+  //game settings
+  bool gameHasStarted = false;
+
+  void startGame() {
+    Timer.periodic(Duration(milliseconds: 50), (timer) {
+      height = gravity * time * time + velocity * time;
       setState(() {
-        birdY -= 0.05;
-
+        birdY = initialPos - height;
       });
+      print(birdY);
+
+      //
+      if (birdY < -1 || birdY > 1) {
+        timer.cancel();
+      }
+
+      time += 0.01;
     });
   }
+
+  void jump() {
+    setState(() {
+      time = 0;
+      initialPos = birdY;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: jump,
+      onTap: gameHasStarted ? jump : startGame,
       child: Column(
         children: <Widget>[
           Expanded(
@@ -40,7 +61,19 @@ class _HomePageState extends State<HomePage> {
               child: Center(
                 child: Stack(
                   children: [
-                    Bird(birdY: birdY)
+                    Bird(birdY: birdY),
+                    Container(
+                      alignment: Alignment(0, -0.7),
+                      child: DefaultTextStyle(
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                        child: Text(
+                          gameHasStarted ? 'HELLO ALMOST THERE' : 'T A P  T O  P L A Y',
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
